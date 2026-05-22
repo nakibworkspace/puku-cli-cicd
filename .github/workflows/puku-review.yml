@@ -1,0 +1,46 @@
+name: Puku CLI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Puku CLI Review
+        env:
+          PUKU_API_KEY: ${{ secrets.PUKU_API_KEY }}
+        run: |
+          puku -p "Review the changes in this PR" \
+            --output-format json \
+            --json-schema '{
+              "type": "object",
+              "properties": {
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "severity": {"type": "string"},
+                      "file": {"type": "string"},
+                      "line": {"type": "number"},
+                      "description": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }' > findings.json
+
+      - name: Parse and Enforce
+        run: |
+          if grep -q '"severity": "critical"' findings.json; then
+            echo "Critical issues found. Blocking merge."
+            exit 1
+          fi
+          echo "No critical issues. Proceeding."
