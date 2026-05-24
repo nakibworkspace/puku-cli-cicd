@@ -19,13 +19,13 @@ jobs:
           node-version: '20'
 
       - name: Install Puku CLI
-        run: npm install -g puku-cli
+        run: npm install -g @puku/puku-cli
 
       - name: Run Puku CLI Review
         env:
           PUKU_API_KEY: ${{ secrets.PUKU_API_KEY }}
         run: |
-          puku -p "Review the changes in this PR" \
+          puku-cli -p "Review the changes in this PR" \
             --output-format json \
             --json-schema '{
               "type": "object",
