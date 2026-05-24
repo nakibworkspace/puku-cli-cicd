@@ -13,11 +13,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Puku CLI
+        run: npm install -g @puku/puku-cli
+
       - name: Run Puku CLI Review
         env:
           PUKU_API_KEY: ${{ secrets.PUKU_API_KEY }}
         run: |
-          puku -p "Review the changes in this PR" \
+          puku-cli -p "Review the changes in this PR" \
             --output-format json \
             --json-schema '{
               "type": "object",
